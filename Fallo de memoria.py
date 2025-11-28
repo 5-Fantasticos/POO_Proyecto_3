@@ -35,7 +35,7 @@ class VistaEstadisticas(tk.Frame):
         self.label_dias.pack(pady=(5, 0))
 
         # Simulación de gráfica
-        self.canvas = tk.Canvas(self, width=220, height=70, bg="white", highlightthickness=1, highlightbackground="black")
+        self.canvas = tk.Canvas(self, width=220, height=80, bg="white", highlightthickness=1, highlightbackground="black")
         self.canvas.pack(pady=5)
         # Dibuja una línea y puntos simulando la gráfica
         puntos = [(10, 50), (50, 55), (90, 55), (130, 30), (170, 60)]
@@ -127,7 +127,7 @@ class VistaPrincipal(tk.Frame):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("300x450")
+        self.geometry("350x450")
         self.resizable(False, False)
         self.config(bg="white")
         self.title("Administrador")
