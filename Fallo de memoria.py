@@ -1,25 +1,6 @@
 import tkinter as tk
 from datetime import datetime
-
-# Funciones para manejar eventos y historial
-def guardar_evento(titulo, hora, dias, creador):
-    with open("eventos.txt", "a") as f:
-        f.write(f"{titulo}|{hora}|{','.join(dias)}|{creador}|pendiente\n")
-    registrar_historial("None", creador, "creó evento")
-
-# Función para registrar acciones en el historial
-def registrar_historial(evento_id, usuario, accion):
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open("historial.txt", "a") as f:
-        f.write(f"{evento_id}|{usuario}|{accion}|{timestamp}\n")
-
-# Función para leer eventos desde el archivo
-def leer_eventos():
-    try:
-        with open("eventos.txt", "r") as f:
-            return [line.strip().split("|") for line in f.readlines()]
-    except FileNotFoundError:
-        return []
+from modelo import *
     
 # Pantalla de inicio con opciones de usuario y administrador
 class PantallaInicio(tk.Frame):
@@ -174,7 +155,7 @@ class VistaPrincipal(tk.Frame):
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.geometry("300x450") # Tamaño de la ventana
+        self.geometry("350x450") # Tamaño de la ventana
         self.resizable(False, False) 
         self.config(bg="white")
         self.title("Administrador")
