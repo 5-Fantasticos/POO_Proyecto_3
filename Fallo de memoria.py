@@ -968,6 +968,7 @@ class MemoriaApp(App):
                 json.dump(datos, f, ensure_ascii=False, indent=2)
 
 
+# Punto de entrada de la aplicación
 if __name__ == "__main__":
     MemoriaApp().run()
 
