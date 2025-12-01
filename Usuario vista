@@ -1,0 +1,79 @@
+"""Vista de usuario en Kivy con tres botones grandes.
+
+Botones:
+- Crear Recordatorio
+- Eliminar Recordatorio
+- Modificar Recordatorio
+
+Puedes ejecutar este archivo directamente o integrar la clase
+`UsuarioScreen` en tu `ScreenManager` existente del proyecto.
+"""
+
+from kivy.config import Config
+
+Config.set("graphics", "width", "350")
+Config.set("graphics", "height", "450")
+Config.set("graphics", "resizable", False)
+
+from kivy.app import App
+from kivy.lang import Builder
+from kivy.uix.screenmanager import Screen
+
+
+class UsuarioScreen(Screen):
+    pass
+
+
+KV_USUARIO = r"""
+#:import dp kivy.metrics.dp
+
+UsuarioScreen:
+
+<UsuarioScreen>:
+    name: 'usuario'
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(16)
+        spacing: dp(16)
+        Widget:
+            size_hint_y: None
+            height: dp(20)
+        Button:
+            text: 'Crear Recordatorio'
+            font_size: '20sp'
+            size_hint_y: None
+            height: dp(70)
+            color: 1, 1, 1, 1
+            background_normal: ''
+            background_color: 0.4, 0.0, 0.5, 1  # morado
+        Button:
+            text: 'Eliminar Recordatorio'
+            font_size: '20sp'
+            size_hint_y: None
+            height: dp(70)
+            color: 1, 1, 1, 1
+            background_normal: ''
+            background_color: 0.4, 0.0, 0.5, 1  # morado
+        Button:
+            text: 'Modificar Recordatorio'
+            font_size: '20sp'
+            size_hint_y: None
+            height: dp(70)
+            color: 1, 1, 1, 1
+            background_normal: ''
+            background_color: 0.4, 0.0, 0.5, 1  # morado
+        Widget:
+            size_hint_y: None
+            height: dp(20)
+"""
+
+
+class UsuarioApp(App):
+    def build(self):
+        self.title = "Usuario"
+        return Builder.load_string(KV_USUARIO)
+
+
+if __name__ == "__main__":
+    UsuarioApp().run()
+

@@ -1,0 +1,28 @@
+[
+  {
+    "titulo": "aaa",
+    "hora": "10:05",
+    "dias": [],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "importante": true,
+    "repetir": "No repetir",
+    "completado": false,
+    "id": 1
+  },
+  {
+    "titulo": "pollo",
+    "hora": "10:05",
+    "dias": [
+      "LUN"
+    ],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "importante": false,
+    "repetir": "No repetir",
+    "completado": false,
+    "id": 2
+  }
+]
