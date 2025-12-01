@@ -5,7 +5,7 @@ from Controlador import Controlador
 def main():
     # Usar el controlador para que la interfaz se conecte al modelo y lea el .json
     controlador = Controlador()
-    controlador.vista.cambiar_pantalla("UsuarioScreen")
+    controlador.vista.cambiar_pantalla("InicioScreen")
     controlador.ejecutar()
 
 if __name__ == "__main__":

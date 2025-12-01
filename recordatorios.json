@@ -56,5 +56,65 @@
     "eliminado": false,
     "completado": true,
     "fecha_completado": "2025-12-01"
+  },
+  {
+    "titulo": "se",
+    "hora": "10:05",
+    "repetir": "No repetir",
+    "importante": false,
+    "dias": [],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "fecha": "2025-12-10",
+    "id": 5,
+    "eliminado": false,
+    "completado": true,
+    "fecha_completado": "2025-12-01"
+  },
+  {
+    "titulo": "test 3",
+    "hora": "9:05",
+    "repetir": "No repetir",
+    "importante": false,
+    "dias": [],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "fecha": "2025-12-12",
+    "id": 6,
+    "eliminado": false,
+    "completado": false
+  },
+  {
+    "titulo": "|sdfghj",
+    "hora": "10:05",
+    "repetir": "No repetir",
+    "importante": false,
+    "dias": [],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "fecha": "2025-12-12",
+    "id": 7,
+    "eliminado": false,
+    "completado": false
+  },
+  {
+    "titulo": "Probando codigo",
+    "hora": "10:05",
+    "repetir": "No repetir",
+    "importante": false,
+    "dias": [
+      "MAR"
+    ],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "fecha": "2025-12-01",
+    "id": 8,
+    "eliminado": false,
+    "completado": true,
+    "fecha_completado": "2025-12-01"
   }
 ]

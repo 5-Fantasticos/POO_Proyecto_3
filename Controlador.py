@@ -22,16 +22,22 @@ class Controlador:
         self.actualizar_pendientes_usuario()
 
     def actualizar_pendientes_usuario(self):
-        # Obtiene los recordatorios no completados y no eliminados
-        pendientes = [r for r in self.modelo.cargar_todos() if not r.get('completado') and not r.get('eliminado')]
+        # Obtiene los recordatorios no completados y no eliminados SOLO para hoy
+        from datetime import datetime
+        hoy = datetime.today().date()
+        pendientes = [
+            r for r in self.modelo.cargar_todos()
+            if not r.get('completado') and not r.get('eliminado') and r.get('fecha') == hoy.strftime("%Y-%m-%d")
+        ]
         frame = self.vista.frames.get("UsuarioScreen")
         if frame and hasattr(frame, "usuario_cont"):
             # Limpia el contenedor
             for widget in frame.usuario_cont.winfo_children():
                 widget.destroy()
-            # Muestra cada recordatorio pendiente
+            # Muestra cada recordatorio pendiente, mostrando la fecha real del recordatorio
             for r in pendientes:
-                texto = f"[{r.get('id')}] {r.get('titulo','')} - {r.get('hora','')}"
+                fecha = r.get('fecha', '')
+                texto = f"[{r.get('id')}] {r.get('titulo','')} - {fecha} {r.get('hora','')}"
                 import tkinter as tk
                 lbl = tk.Label(frame.usuario_cont, text=texto, fg="#0f1722", bg="#ffffff", anchor="w")
                 lbl.pack(fill="x", padx=8, pady=2)
