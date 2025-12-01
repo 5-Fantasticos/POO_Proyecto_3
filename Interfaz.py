@@ -1,478 +1,186 @@
-from kivy.graphics import Color, Ellipse, Line
-from kivy.uix.widget import Widget
-from kivy.uix.popup import Popup
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.scrollview import ScrollView
-from kivy.uix.screenmanager import FadeTransition, ScreenManager
-from kivy.metrics import dp
+import tkinter as tk
+from tkinter import ttk
 
-KV = r"""
-#:import dp kivy.metrics.dp
-#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Recordatorios")
+        self.geometry("600x700")
+        self.configure(bg="#24102b")
+        self.frames = {}
+        for F in (InicioScreen, UsuarioScreen, PrincipalScreen, RealizadasScreen, RecordatorioScreen, ListaRecordatoriosScreen):
+            frame = F(self)
+            self.frames[F.__name__] = frame
+            frame.place(relwidth=1, relheight=1)
+        self.cambiar_pantalla("InicioScreen")
 
-ScreenManager:
-    transition: FadeTransition(duration=0.2)
-    InicioScreen:
-    UsuarioScreen:
-    PrincipalScreen:
-    RealizadasScreen:
-    RecordatorioScreen:
-    ListaRecordatoriosScreen:
+    def cambiar_pantalla(self, nombre):
+        for f in self.frames.values():
+            f.place_forget()
+        self.frames[nombre].place(relwidth=1, relheight=1)
 
-<ColoredSpacer@Widget>:
-    size_hint_y: None
-    height: dp(20)
+    # Métodos de ejemplo para enlazar con botones
+    def leer_pendientes(self):
+        pass
 
-<DarkLabel@Label>:
-    color: 1, 1, 1, 1
-    text_size: self.width, None
-    halign: 'center'
+    def mostrar_lista(self, modo):
+        self.cambiar_pantalla("ListaRecordatoriosScreen")
 
-<InfoLabel@Label>:
-    color: 1, 1, 1, 1
-    text_size: self.width, None
-    halign: 'left'
+    def crear_recordatorio(self):
+        pass
 
-<DayToggle@ToggleButton>:
-    size_hint_y: None
-    height: dp(34)
-    background_normal: ''
-    background_down: ''
-    background_color: (0.4, 0.0, 0.5, 1) if self.state == 'down' else (0.15, 0.15, 0.15, 1)
-    color: 1, 1, 1, 1
+    def cambiar_filtro_realizadas(self, filtro):
+        pass
 
-<InicioScreen>:
-    name: 'inicio'
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(16)
-        spacing: dp(20)
-        ColoredSpacer:
-        DarkLabel:
-            text: 'HOLA!!'
-            font_size: '24sp'
-            bold: True
-        GridLayout:
-            cols: 2
-            spacing: dp(20)
-            size_hint_y: None
-            height: dp(140)
-            Button:
-                text: 'Usuario'
-                font_size: '18sp'
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.cambiar_pantalla('usuario')
-            Button:
-                text: 'Administrador'
-                font_size: '18sp'
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.cambiar_pantalla('principal')
-        Widget:
-        ColoredSpacer:
+    def cambiar_filtro_dia_realizadas(self, dia):
+        pass
 
-<UsuarioScreen>:
-    name: 'usuario'
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(16)
-        spacing: dp(12)
-        DarkLabel:
-            text: 'Recordatorios Pendientes'
-            font_size: '20sp'
-            bold: True
-        Widget:
-            size_hint_y: None
-            height: dp(35)
-        ScrollView:
-            do_scroll_x: False
-            BoxLayout:
-                id: usuario_cont
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(8)
-        Button:
-            size_hint_y: None
-            height: dp(48)
-            text: 'Leer pendientes'
-            color: 1,1,1,1
-            background_normal: ''
-            background_color: 0.4,0.0,0.5,1
-            on_release: app.leer_pendientes()
-        Button:
-            size_hint_y: None
-            height: dp(48)
-            text: 'Volver'
-            color: 1,1,1,1
-            background_normal: ''
-            background_color: 0.4,0.0,0.5,1
-            on_release: app.cambiar_pantalla('inicio')
+    def cambiar_filtro_semana_realizadas(self, semana):
+        pass
 
-<PrincipalScreen>:
-    name: 'principal'
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(16)
-        spacing: dp(12)
-        Widget:
-            size_hint_y: 0.35  # espacio superior
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: None
-            height: dp(380)
-            spacing: dp(14)
-            Button:
-                text: 'Tareas realizadas'
-                font_size: '20sp'
-                size_hint_y: None
-                height: dp(70)
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.cambiar_pantalla('tareas')
-            Button:
-                text: 'Crear Recordatorio'
-                font_size: '20sp'
-                size_hint_y: None
-                height: dp(70)
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.cambiar_pantalla('recordatorio')
-            Button:
-                text: 'Eliminar Recordatorio'
-                font_size: '20sp'
-                size_hint_y: None
-                height: dp(70)
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.mostrar_lista('eliminar')
-            Button:
-                text: 'Modificar Recordatorio'
-                font_size: '20sp'
-                size_hint_y: None
-                height: dp(70)
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.mostrar_lista('modificar')
-            Button:
-                text: 'Inicio'
-                font_size: '16sp'
-                size_hint_y: None
-                height: dp(50)
-                color: 1,1,1,1
-                background_normal: ''
-                background_color: 0.4,0.0,0.5,1
-                on_release: app.cambiar_pantalla('inicio')
-        Widget:
-            size_hint_y: 0.65  # espacio inferior mayor para empujar bloque hacia abajo
-<ListaRecordatoriosScreen>:
-    name: 'lista'
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(16)
-        spacing: dp(10)
-        DarkLabel:
-            id: titulo_lista
-            text: 'Selecciona un recordatorio'
-            font_size: '18sp'
-            bold: True
-        ScrollView:
-            do_scroll_x: False
-            BoxLayout:
-                id: contenedor_lista
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(8)
-        BoxLayout:
-            size_hint_y: None
-            height: dp(50)
-            spacing: dp(10)
-            Button:
-                text: 'Volver'
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.cambiar_pantalla('principal')
+    def cambiar_filtro_mes_realizadas(self, mes):
+        pass
 
-<RealizadasScreen>:
-    name: 'tareas'
-    BoxLayout:
-        orientation: 'vertical'
-        padding: dp(16)
-        spacing: dp(12)
-        DarkLabel:
-            text: 'Tareas realizadas'
-            font_size: '20sp'
-            bold: True
-        BoxLayout:
-            size_hint_y: None
-            height: dp(50)
-            spacing: dp(10)
-            Button:
-                text: 'Prioritarias'
-                color: 1,1,1,1
-                background_normal: ''
-                background_color: (0.4, 0.0, 0.5, 1) if app.filtro_realizadas == 'prioritarias' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_realizadas('prioritarias')
-            Button:
-                text: 'Secundarias'
-                color: 1,1,1,1
-                background_normal: ''
-                background_color: (0.4, 0.0, 0.5, 1) if app.filtro_realizadas == 'secundarias' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_realizadas('secundarias')
-        BoxLayout:
-            size_hint_y: None
-            height: dp(46)
-            spacing: dp(6)
-            Button:
-                text: 'Todos'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'todos' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('todos')
-            Button:
-                text: 'LUN'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'LUN' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('LUN')
-            Button:
-                text: 'MAR'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'MAR' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('MAR')
-            Button:
-                text: 'MIE'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'MIE' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('MIE')
-            Button:
-                text: 'JUE'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'JUE' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('JUE')
-            Button:
-                text: 'VIE'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'VIE' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('VIE')
-            Button:
-                text: 'SAB'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'SAB' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('SAB')
-            Button:
-                text: 'DOM'
-                font_size: '14sp'
-                background_normal: ''
-                background_color: (0.4,0.0,0.5,1) if app.filtro_dia_realizadas == 'DOM' else (0.15,0.15,0.15,1)
-                on_release: app.cambiar_filtro_dia_realizadas('DOM')
-        BoxLayout:
-            size_hint_y: None
-            height: dp(46)
-            spacing: dp(6)
-            Label:
-                text: 'Semana:'
-                color: 1,1,1,1
-                size_hint_x: None
-                width: dp(70)
-            Spinner:
-                id: semana_spn
-                text: app.filtro_semana_realizadas if app.filtro_semana_realizadas else 'todas'
-                values: ('todas','Semana 1','Semana 2','Semana 3','Semana 4')
-                size_hint_y: None
-                height: dp(40)
-                background_color: (0.4,0.0,0.5,1) if app.filtro_semana_realizadas != 'todas' else (0.15,0.15,0.15,1)
-                color: 1,1,1,1
-                on_text: app.cambiar_filtro_semana_realizadas(self.text)
-        BoxLayout:
-            size_hint_y: None
-            height: dp(46)
-            spacing: dp(10)
-            Label:
-                text: 'Mes:'
-                color: 1,1,1,1
-                size_hint_x: None
-                width: dp(70)
-            Spinner:
-                id: mes_spn
-                text: app.filtro_mes_realizadas if app.filtro_mes_realizadas else 'todos'
-                values: ('todos','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre')
-                size_hint_y: None
-                height: dp(40)
-                background_color: (0.4,0.0,0.5,1) if app.filtro_mes_realizadas != 'todos' else (0.15,0.15,0.15,1)
-                color: 1,1,1,1
-                on_text: app.cambiar_filtro_mes_realizadas(self.text)
-        ScrollView:
-            do_scroll_x: False
-            BoxLayout:
-                id: realizadas_cont
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                spacing: dp(8)
-        Button:
-            size_hint_y: None
-            height: dp(48)
-            text: 'Volver'
-            color: 1, 1, 1, 1
-            background_normal: ''
-            background_color: 0.4, 0.0, 0.5, 1
-            on_release: app.cambiar_pantalla('principal')
+# Widgets personalizados
+def dark_label(parent, text, size=14, bold=False):
+    font = ("Arial", size, "bold" if bold else "normal")
+    return tk.Label(parent, text=text, fg="white", bg="#24102b", font=font)
 
-<RecordatorioScreen>:
-    name: 'recordatorio'
-    BoxLayout:
-        orientation: 'vertical'
-        padding: 0
-        spacing: dp(10)
-        ScrollView:
-            do_scroll_x: False
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                padding: dp(16)
-                spacing: dp(10)
-                DarkLabel:
-                    text: 'AÑADIR RECORDATORIO'
-                    font_size: '18sp'
-                    bold: True
-                InfoLabel:
-                    text: 'Título'
-                TextInput:
-                    id: titulo_input
-                    size_hint_y: None
-                    height: dp(40)
-                    multiline: False
-                InfoLabel:
-                    text: 'Hora (HH:MM)'
-                TextInput:
-                    id: hora_input
-                    size_hint_y: None
-                    height: dp(40)
-                    text: '10:05'
-                    multiline: False
-                InfoLabel:
-                    text: 'Repetir'
-                Spinner:
-                    id: repetir_spn
-                    size_hint_y: None
-                    height: dp(40)
-                    text: 'No repetir'
-                    values: ('No repetir','Diariamente','Semanalmente','Mensualmente')
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    spacing: dp(10)
-                    InfoLabel:
-                        text: 'Importante'
-                        halign: 'left'
-                    CheckBox:
-                        id: importante_chk
-                        size_hint_x: None
-                        width: dp(30)
-                InfoLabel:
-                    text: 'Días de recordatorio'
-                GridLayout:
-                    cols: 4
-                    spacing: dp(6)
-                    size_hint_y: None
-                    height: dp(90)
-                    DayToggle:
-                        id: dia_lun
-                        text: 'LUN'
-                    DayToggle:
-                        id: dia_mar
-                        text: 'MAR'
-                    DayToggle:
-                        id: dia_mie
-                        text: 'MIE'
-                    DayToggle:
-                        id: dia_jue
-                        text: 'JUE'
-                    DayToggle:
-                        id: dia_vie
-                        text: 'VIE'
-                    DayToggle:
-                        id: dia_sab
-                        text: 'SAB'
-                    DayToggle:
-                        id: dia_dom
-                        text: 'DOM'
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    spacing: dp(10)
-                    InfoLabel:
-                        text: 'Mantener'
-                        halign: 'left'
-                    CheckBox:
-                        id: mantener_chk
-                        size_hint_x: None
-                        width: dp(30)
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    spacing: dp(10)
-                    InfoLabel:
-                        text: 'Alarma'
-                        halign: 'left'
-                    CheckBox:
-                        id: alarma_chk
-                        size_hint_x: None
-                        width: dp(30)
-                InfoLabel:
-                    text: 'Sonido'
-                Spinner:
-                    id: sonido_spn
-                    size_hint_y: None
-                    height: dp(40)
-                    text: 'JHON CENA SATURED'
-                    values: ('JHON CENA SATURED', 'Otro sonido')
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    spacing: dp(10)
-                    InfoLabel:
-                        text: 'Mantener'
-                        halign: 'left'
-                    CheckBox:
-                        id: mantener_chk
-                        size_hint_x: None
-                        width: dp(30)
-        BoxLayout:
-            size_hint_y: None
-            height: dp(56)
-            spacing: dp(10)
-            padding: dp(10), 0
-            Button:
-                text: 'Crear'
-                color: 1, 1, 1, 1
-                background_normal: ''
-                background_color: 0.4, 0.0, 0.5, 1
-                on_release: app.crear_recordatorio()
-        Button:
-            size_hint_y: None
-            height: dp(48)
-            text: 'Volver'
-            color: 1, 1, 1, 1
-            background_normal: ''
-            background_color: 0.4, 0.0, 0.5, 1
-            on_release: app.cambiar_pantalla('principal')
-"""
+def info_label(parent, text, size=12):
+    return tk.Label(parent, text=text, fg="white", bg="#24102b", anchor="w", font=("Arial", size))
+
+def colored_button(parent, text, command=None, size=14):
+    return tk.Button(parent, text=text, fg="white", bg="#660080", font=("Arial", size), command=command, relief="flat", activebackground="#4d0066")
+
+def day_toggle(parent, text, var):
+    return tk.Checkbutton(parent, text=text, fg="white", bg="#24102b", selectcolor="#660080", variable=var, font=("Arial", 10, "bold"))
+
+# Pantallas
+class InicioScreen(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg="#24102b")
+        tk.Label(self, bg="#24102b").pack(pady=20)
+        dark_label(self, "HOLA!!", size=24, bold=True).pack(pady=10)
+        btn_frame = tk.Frame(self, bg="#24102b")
+        btn_frame.pack(pady=30)
+        colored_button(btn_frame, "Usuario", lambda: master.cambiar_pantalla("UsuarioScreen"), size=18).grid(row=0, column=0, padx=20, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Administrador", lambda: master.cambiar_pantalla("PrincipalScreen"), size=18).grid(row=0, column=1, padx=20, ipadx=10, ipady=10)
+
+class UsuarioScreen(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg="#24102b")
+        dark_label(self, "Recordatorios Pendientes", size=20, bold=True).pack(pady=10)
+        tk.Frame(self, height=35, bg="#24102b").pack()
+        cont = tk.Frame(self, bg="#24102b")
+        cont.pack(expand=True, fill="both")
+        self.usuario_cont = tk.Frame(cont, bg="#24102b")
+        self.usuario_cont.pack(expand=True, fill="both")
+        colored_button(self, "Leer pendientes", master.leer_pendientes, size=14).pack(pady=8, ipadx=10, ipady=5)
+        colored_button(self, "Volver", lambda: master.cambiar_pantalla("InicioScreen"), size=14).pack(pady=8, ipadx=10, ipady=5)
+
+class PrincipalScreen(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg="#24102b")
+        tk.Frame(self, height=80, bg="#24102b").pack()
+        btn_frame = tk.Frame(self, bg="#24102b")
+        btn_frame.pack(pady=20)
+        colored_button(btn_frame, "Tareas realizadas", lambda: master.cambiar_pantalla("RealizadasScreen"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Crear Recordatorio", lambda: master.cambiar_pantalla("RecordatorioScreen"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Eliminar Recordatorio", lambda: master.mostrar_lista("eliminar"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Modificar Recordatorio", lambda: master.mostrar_lista("modificar"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Inicio", lambda: master.cambiar_pantalla("InicioScreen"), size=16).pack(fill="x", pady=7, ipadx=10, ipady=7)
+
+class ListaRecordatoriosScreen(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg="#24102b")
+        dark_label(self, "Selecciona un recordatorio", size=18, bold=True).pack(pady=10)
+        self.contenedor_lista = tk.Frame(self, bg="#24102b")
+        self.contenedor_lista.pack(expand=True, fill="both")
+        colored_button(self, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
+
+class RealizadasScreen(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg="#24102b")
+        dark_label(self, "Tareas realizadas", size=20, bold=True).pack(pady=10)
+        filtro_frame = tk.Frame(self, bg="#24102b")
+        filtro_frame.pack(pady=5)
+        self.filtro_realizadas = tk.StringVar(value="prioritarias")
+        tk.Radiobutton(filtro_frame, text="Prioritarias", variable=self.filtro_realizadas, value="prioritarias", fg="white", bg="#24102b", selectcolor="#660080", command=lambda: master.cambiar_filtro_realizadas("prioritarias")).pack(side="left", padx=5)
+        tk.Radiobutton(filtro_frame, text="Secundarias", variable=self.filtro_realizadas, value="secundarias", fg="white", bg="#24102b", selectcolor="#660080", command=lambda: master.cambiar_filtro_realizadas("secundarias")).pack(side="left", padx=5)
+        # Filtros por día
+        dias_frame = tk.Frame(self, bg="#24102b")
+        dias_frame.pack(pady=5)
+        self.filtro_dia = tk.StringVar(value="todos")
+        for dia in ["Todos", "LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM"]:
+            tk.Radiobutton(dias_frame, text=dia, variable=self.filtro_dia, value=dia, fg="white", bg="#24102b", selectcolor="#660080", command=lambda d=dia: master.cambiar_filtro_dia_realizadas(d)).pack(side="left", padx=2)
+        # Filtro semana
+        semana_frame = tk.Frame(self, bg="#24102b")
+        semana_frame.pack(pady=5)
+        tk.Label(semana_frame, text="Semana:", fg="white", bg="#24102b", width=8).pack(side="left")
+        self.semana_var = tk.StringVar(value="todas")
+        semana_spn = ttk.Combobox(semana_frame, textvariable=self.semana_var, values=["todas", "Semana 1", "Semana 2", "Semana 3", "Semana 4"], width=10)
+        semana_spn.pack(side="left")
+        semana_spn.bind("<<ComboboxSelected>>", lambda e: master.cambiar_filtro_semana_realizadas(self.semana_var.get()))
+        # Filtro mes
+        mes_frame = tk.Frame(self, bg="#24102b")
+        mes_frame.pack(pady=5)
+        tk.Label(mes_frame, text="Mes:", fg="white", bg="#24102b", width=8).pack(side="left")
+        self.mes_var = tk.StringVar(value="todos")
+        meses = ["todos","enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"]
+        mes_spn = ttk.Combobox(mes_frame, textvariable=self.mes_var, values=meses, width=12)
+        mes_spn.pack(side="left")
+        mes_spn.bind("<<ComboboxSelected>>", lambda e: master.cambiar_filtro_mes_realizadas(self.mes_var.get()))
+        # Lista de tareas realizadas
+        self.realizadas_cont = tk.Frame(self, bg="#24102b")
+        self.realizadas_cont.pack(expand=True, fill="both", pady=10)
+        colored_button(self, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
+
+class RecordatorioScreen(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg="#24102b")
+        cont = tk.Frame(self, bg="#24102b")
+        cont.pack(expand=True, fill="both", padx=16, pady=10)
+        dark_label(cont, "AÑADIR RECORDATORIO", size=18, bold=True).pack(pady=5)
+        info_label(cont, "Título").pack(anchor="w")
+        self.titulo_input = tk.Entry(cont, font=("Arial", 12))
+        self.titulo_input.pack(fill="x", pady=2)
+        info_label(cont, "Hora (HH:MM)").pack(anchor="w")
+        self.hora_input = tk.Entry(cont, font=("Arial", 12))
+        self.hora_input.insert(0, "10:05")
+        self.hora_input.pack(fill="x", pady=2)
+        info_label(cont, "Repetir").pack(anchor="w")
+        self.repetir_var = tk.StringVar(value="No repetir")
+        ttk.Combobox(cont, textvariable=self.repetir_var, values=["No repetir","Diariamente","Semanalmente","Mensualmente"]).pack(fill="x", pady=2)
+        imp_frame = tk.Frame(cont, bg="#24102b")
+        imp_frame.pack(fill="x", pady=2)
+        info_label(imp_frame, "Importante").pack(side="left")
+        self.importante_chk = tk.BooleanVar()
+        tk.Checkbutton(imp_frame, variable=self.importante_chk, bg="#24102b", selectcolor="#660080").pack(side="left")
+        info_label(cont, "Días de recordatorio").pack(anchor="w")
+        dias_frame = tk.Frame(cont, bg="#24102b")
+        dias_frame.pack(fill="x", pady=2)
+        self.dias_vars = [tk.BooleanVar() for _ in range(7)]
+        for i, dia in enumerate(["LUN","MAR","MIE","JUE","VIE","SAB","DOM"]):
+            day_toggle(dias_frame, dia, self.dias_vars[i]).pack(side="left", padx=3)
+        mant_frame = tk.Frame(cont, bg="#24102b")
+        mant_frame.pack(fill="x", pady=2)
+        info_label(mant_frame, "Mantener").pack(side="left")
+        self.mantener_chk = tk.BooleanVar()
+        tk.Checkbutton(mant_frame, variable=self.mantener_chk, bg="#24102b", selectcolor="#660080").pack(side="left")
+        alarma_frame = tk.Frame(cont, bg="#24102b")
+        alarma_frame.pack(fill="x", pady=2)
+        info_label(alarma_frame, "Alarma").pack(side="left")
+        self.alarma_chk = tk.BooleanVar()
+        tk.Checkbutton(alarma_frame, variable=self.alarma_chk, bg="#24102b", selectcolor="#660080").pack(side="left")
+        info_label(cont, "Sonido").pack(anchor="w")
+        self.sonido_var = tk.StringVar(value="JHON CENA SATURED")
+        ttk.Combobox(cont, textvariable=self.sonido_var, values=["JHON CENA SATURED", "Otro sonido"]).pack(fill="x", pady=2)
+        # Botones
+        btn_frame = tk.Frame(self, bg="#24102b")
+        btn_frame.pack(fill="x", pady=10)
+        colored_button(btn_frame, "Crear", master.crear_recordatorio, size=14).pack(side="left", padx=10, ipadx=10, ipady=5)
+        colored_button(btn_frame, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(side="left", padx=10, ipadx=10, ipady=5)
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()
