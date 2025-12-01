@@ -76,6 +76,15 @@ class App(tk.Tk):
     def cambiar_filtro_mes_realizadas(self, mes):
         pass
 
+    def abrir_plantilla_agregar_evento(self, fecha_str):
+        # Cambia a la pantalla de agregar recordatorio y coloca la fecha seleccionada
+        # Detecta si vienes de usuario o admin
+        anterior = self.pantalla_anterior or "UsuarioScreen"
+        self.cambiar_pantalla("RecordatorioScreen", anterior=anterior)
+        recordatorio_screen = self.frames.get("RecordatorioScreen")
+        if recordatorio_screen and hasattr(recordatorio_screen, "set_fecha"):
+            recordatorio_screen.set_fecha(fecha_str)
+
 # Widgets personalizados
 def dark_label(parent, text, size=14, bold=False):
     font = ("Segoe UI", size, "bold" if bold else "normal")
@@ -172,14 +181,14 @@ class UsuarioScreen(tk.Frame):
         # Botones de acciones
         btns = tk.Frame(card, bg="#fff")
         btns.pack(pady=10)
-        colored_button(btns, "Crear evento", lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="UsuarioScreen"), size=14, icon="➕").pack(side="left", padx=12, ipadx=10, ipady=5)
+        colored_button(btns, "Crear evento", controlador.on_crear_evento, size=14, icon="➕").pack(side="left", padx=12, ipadx=10, ipady=5)
         colored_button(btns, "Eliminar evento", self.eliminar_evento, size=14, icon="🗑️").pack(side="left", padx=12, ipadx=10, ipady=5)
         colored_button(btns, "Ver realizadas", lambda: master.cambiar_pantalla("RealizadasScreen", anterior="UsuarioScreen"), size=14, icon="✅").pack(side="left", padx=12, ipadx=10, ipady=5)
         colored_button(card, "Volver", lambda: master.cambiar_pantalla("InicioScreen"), size=14, icon="🔙").pack(pady=8, ipadx=10, ipady=5)
         # Floating action button — estilo Medisafe para añadir rápidamente
-        fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 20, "bold"), bd=0, relief="flat", command=lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="UsuarioScreen"))
-        fab.configure(activebackground="#5aa0ff")
-        fab.place(relx=0.92, rely=0.84, anchor="center")
+        # fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 20, "bold"), bd=0, relief="flat", command=controlador.on_crear_evento)
+        # fab.configure(activebackground="#5aa0ff")
+        # fab.place(relx=0.92, rely=0.84, anchor="center")
         # Variable para saber qué tarea está seleccionada para eliminar
         self.tarea_seleccionada = tk.IntVar(value=0)
         # Footer
@@ -249,14 +258,14 @@ class PrincipalScreen(tk.Frame):
         btn_frame = tk.Frame(card, bg="#fff")
         btn_frame.pack(pady=30)
         colored_button(btn_frame, "Tareas realizadas", lambda: master.cambiar_pantalla("RealizadasScreen", anterior="PrincipalScreen"), size=20, icon="✅").pack(fill="x", pady=10, ipadx=10, ipady=10)
-        colored_button(btn_frame, "Crear Recordatorio", lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="PrincipalScreen"), size=20, icon="➕").pack(fill="x", pady=10, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Crear Recordatorio", controlador.on_crear_evento, size=20, icon="➕").pack(fill="x", pady=10, ipadx=10, ipady=10)
         colored_button(btn_frame, "Eliminar Recordatorio", lambda: master.mostrar_lista("eliminar"), size=20, icon="🗑️").pack(fill="x", pady=10, ipadx=10, ipady=10)
         colored_button(btn_frame, "Modificar Recordatorio", lambda: master.mostrar_lista("modificar"), size=20, icon="✏️").pack(fill="x", pady=10, ipadx=10, ipady=10)
         colored_button(btn_frame, "Inicio", lambda: master.cambiar_pantalla("InicioScreen"), size=16, icon="🔙").pack(fill="x", pady=10, ipadx=10, ipady=7)
         # Floating action button for quick add
-        fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 20, "bold"), bd=0, relief="flat", command=lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="PrincipalScreen"))
-        fab.configure(activebackground="#5aa0ff")
-        fab.place(relx=0.92, rely=0.86, anchor="center")
+        # fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 20, "bold"), bd=0, relief="flat", command=controlador.on_crear_evento)
+        # fab.configure(activebackground="#5aa0ff")
+        # fab.place(relx=0.92, rely=0.86, anchor="center")
 
         # Footer
         tk.Label(self, text="Hecho con ❤️ por tu equipo", font=("Segoe UI", 10), fg=MUTED, bg=BG).pack(side="bottom", pady=18)
@@ -271,9 +280,9 @@ class ListaRecordatoriosScreen(tk.Frame):
         self.contenedor_lista.pack(expand=True, fill="both", pady=10)
         colored_button(card, "Volver", lambda: master.cambiar_pantalla(master.pantalla_anterior or "PrincipalScreen"), size=14, icon="🔙").pack(pady=10, ipadx=10, ipady=5)
         # Floating add button
-        fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 18, "bold"), bd=0, relief="flat", command=lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="ListaRecordatoriosScreen"))
-        fab.configure(activebackground="#5aa0ff")
-        fab.place(relx=0.9, rely=0.86, anchor="center")
+        # fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 18, "bold"), bd=0, relief="flat", command=lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="ListaRecordatoriosScreen"))
+        # fab.configure(activebackground="#5aa0ff")
+        # fab.place(relx=0.9, rely=0.86, anchor="center")
         # Footer
         tk.Label(self, text="Hecho con ❤️ por tu equipo", font=("Segoe UI", 10), fg=MUTED, bg=BG).pack(side="bottom", pady=18)
 
@@ -316,9 +325,9 @@ class RealizadasScreen(tk.Frame):
         self.realizadas_cont.pack(expand=True, fill="both", pady=10)
         colored_button(card, "Volver", lambda: master.cambiar_pantalla(master.pantalla_anterior or "PrincipalScreen"), size=14, icon="🔙").pack(pady=10, ipadx=10, ipady=5)
         # FAB for this screen
-        fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 18, "bold"), bd=0, relief="flat", command=lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="RealizadasScreen"))
-        fab.configure(activebackground="#5aa0ff")
-        fab.place(relx=0.92, rely=0.86, anchor="center")
+        # fab = tk.Button(self, text="+", bg=PRIMARY, fg="white", font=("Segoe UI", 18, "bold"), bd=0, relief="flat", command=lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="RealizadasScreen"))
+        # fab.configure(activebackground="#5aa0ff")
+        # fab.place(relx=0.92, rely=0.86, anchor="center")
         # Footer
         tk.Label(self, text="Hecho con ❤️ por tu equipo", font=("Segoe UI", 10), fg=MUTED, bg=BG).pack(side="bottom", pady=18)
 

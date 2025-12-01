@@ -55,4 +55,9 @@ class Controlador:
     def ejecutar(self):
         self.vista.mainloop()
 
+    def on_crear_evento(self):
+        from calendario import Calendario
+        calendario = Calendario()
+        calendario.seleccionar_fecha(self.vista.abrir_plantilla_agregar_evento)
+
 
