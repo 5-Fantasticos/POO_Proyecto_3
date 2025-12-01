@@ -175,7 +175,7 @@ class UsuarioScreen(tk.Frame):
         colored_button(btns, "Crear evento", lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="UsuarioScreen"), size=14, icon="➕").pack(side="left", padx=12, ipadx=10, ipady=5)
         colored_button(btns, "Eliminar evento", self.eliminar_evento, size=14, icon="🗑️").pack(side="left", padx=12, ipadx=10, ipady=5)
         colored_button(btns, "Ver realizadas", lambda: master.cambiar_pantalla("RealizadasScreen", anterior="UsuarioScreen"), size=14, icon="✅").pack(side="left", padx=12, ipadx=10, ipady=5)
-        colored_button(card, "Volver", lambda: master.cambiar_pantalla("InicioScreen"), size=14, icon="🔙").pack(pady=8, ipadx=10, ipady=5)
+        colored_button(card, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14, icon="🔙").pack(pady=8, ipadx=10, ipady=5)
         self.tarea_seleccionada = tk.IntVar(value=0)
         # Footer
         tk.Label(self, text="Hecho con ❤️ por tu equipo", font=("Segoe UI", 10), fg=MUTED, bg=BG).pack(side="bottom", pady=18)
@@ -261,7 +261,6 @@ class ListaRecordatoriosScreen(tk.Frame):
         self.contenedor_lista = tk.Frame(card, bg="#fff")
         self.contenedor_lista.pack(expand=True, fill="both", pady=10)
         colored_button(card, "Volver", lambda: master.cambiar_pantalla(master.pantalla_anterior or "PrincipalScreen"), size=14, icon="🔙").pack(pady=10, ipadx=10, ipady=5)
-        # Footer
         tk.Label(self, text="Hecho con   ❤️por tu equipo", font=("Segoe UI", 10), fg=MUTED, bg=BG).pack(side="bottom", pady=18)
 
 class RealizadasScreen(tk.Frame):
