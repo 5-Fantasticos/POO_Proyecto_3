@@ -77,12 +77,18 @@ class Calendario:
         frame_cal = tk.Frame(self.root, bg=BG)
         frame_cal.pack(expand=True, fill="both", padx=40, pady=30)
 
-        # Mes y año
+        # --- Navegación de mes ---
+        nav_frame = tk.Frame(frame_cal, bg=BG)
+        nav_frame.grid(row=0, column=0, columnspan=7, pady=(0, 10))
+        btn_prev = tk.Button(nav_frame, text="◀", font=("Segoe UI", 14, "bold"), bg=BG, fg=PRIMARY, bd=0, command=self._mes_anterior, cursor="hand2")
+        btn_prev.pack(side="left", padx=10)
         meses_es = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
                     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
         mes_actual = meses_es[self.fecha_actual.month - 1]
-        label_mes = tk.Label(frame_cal, text=f"{mes_actual} {self.fecha_actual.year}", font=("Segoe UI", 22, "bold"), bg=BG, fg=PRIMARY)
-        label_mes.grid(row=0, column=0, columnspan=7, pady=(5, 18))
+        label_mes = tk.Label(nav_frame, text=f"{mes_actual} {self.fecha_actual.year}", font=("Segoe UI", 22, "bold"), bg=BG, fg=PRIMARY)
+        label_mes.pack(side="left", padx=20)
+        btn_next = tk.Button(nav_frame, text="▶", font=("Segoe UI", 14, "bold"), bg=BG, fg=PRIMARY, bd=0, command=self._mes_siguiente, cursor="hand2")
+        btn_next.pack(side="left", padx=10)
 
         # Días de la semana
         nombres_es = ["LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM"]
@@ -119,6 +125,24 @@ class Calendario:
             frame_cal.grid_columnconfigure(col, weight=1)
         for row in range(len(semanas) + 2):
             frame_cal.grid_rowconfigure(row, weight=1)
+
+    def _mes_anterior(self):
+        mes = self.fecha_actual.month - 1
+        anio = self.fecha_actual.year
+        if mes < 1:
+            mes = 12
+            anio -= 1
+        self.fecha_actual = self.fecha_actual.replace(year=anio, month=mes, day=1)
+        self._mostrar_calendario_gui(seleccion=True)
+
+    def _mes_siguiente(self):
+        mes = self.fecha_actual.month + 1
+        anio = self.fecha_actual.year
+        if mes > 12:
+            mes = 1
+            anio += 1
+        self.fecha_actual = self.fecha_actual.replace(year=anio, month=mes, day=1)
+        self._mostrar_calendario_gui(seleccion=True)
 
     def _seleccionar_fecha_callback(self, fecha):
         if hasattr(self, "_callback_fecha") and self._callback_fecha:

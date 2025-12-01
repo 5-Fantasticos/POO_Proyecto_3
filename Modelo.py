@@ -30,6 +30,10 @@ class MemoriaModelo:
 
     def guardar_recordatorio(self, rec):
         datos = self.cargar_todos()
+        # Si tienes algo como esto, coméntalo:
+        # for r in datos:
+        #     if r['titulo'] == rec['titulo'] and r['fecha'] == rec['fecha']:
+        #         raise Exception("Ya existe un recordatorio para esa fecha y título")
         next_id = (max((r.get('id', 0) for r in datos), default=0) + 1) if datos else 1
         rec['id'] = next_id
         rec['eliminado'] = False  # Nuevo campo

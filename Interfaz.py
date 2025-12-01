@@ -139,7 +139,9 @@ class InicioScreen(tk.Frame):
         t_left = tk.Frame(today_card, bg=CARD)
         t_left.pack(side="left")
         tk.Label(t_left, text="Hoy", font=("Segoe UI", 14, "bold"), fg=TEXT, bg=CARD).pack(anchor="w")
-        tk.Label(t_left, text="3 recordatorios por resolver", font=("Segoe UI", 11), fg=MUTED, bg=CARD).pack(anchor="w")
+        # Cambia este label para que sea accesible desde el controlador
+        self.label_resumen_pendientes = tk.Label(t_left, text="0 recordatorios por resolver", font=("Segoe UI", 11), fg=MUTED, bg=CARD)
+        self.label_resumen_pendientes.pack(anchor="w")
         # quick actions to the right
         t_right = tk.Frame(today_card, bg=CARD)
         t_right.pack(side="right")
@@ -376,7 +378,13 @@ class RecordatorioScreen(tk.Frame):
         # Botones
         btn_frame = tk.Frame(card, bg="#fff")
         btn_frame.pack(fill="x", pady=10)
-        colored_button(btn_frame, "Crear", master.crear_recordatorio, size=14, icon="✅").pack(side="left", padx=10, ipadx=10, ipady=5)
+        colored_button(
+            btn_frame,
+            "Crear",
+            controlador.crear_recordatorio_desde_vista,  # <-- Cambia aquí
+            size=14,
+            icon="✅"
+        ).pack(side="left", padx=10, ipadx=10, ipady=5)
         colored_button(
             btn_frame,
             "Volver",
@@ -387,6 +395,11 @@ class RecordatorioScreen(tk.Frame):
         # Footer
         tk.Label(self, text="Hecho con ❤️ por tu equipo", font=("Segoe UI", 10), fg=PRIMARY, bg=BG).pack(side="bottom", pady=18)
 
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    def set_fecha(self, fecha_str):
+        self.fecha_seleccionada = fecha_str
+        # Mostrar la fecha en la interfaz si lo deseas
+        if hasattr(self, "label_fecha"):
+            self.label_fecha.config(text=f"Fecha seleccionada: {fecha_str}")
+        else:
+            self.label_fecha = tk.Label(self, text=f"Fecha seleccionada: {fecha_str}", fg=PRIMARY, bg="#fff", font=("Segoe UI", 12, "bold"))
+            self.label_fecha.pack(pady=5)

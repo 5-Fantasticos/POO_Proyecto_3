@@ -23,7 +23,38 @@
     "sonido": "JHON CENA SATURED",
     "importante": false,
     "repetir": "No repetir",
-    "completado": false,
-    "id": 2
+    "completado": true,
+    "id": 2,
+    "fecha_completado": "2025-12-01"
+  },
+  {
+    "titulo": "test",
+    "hora": "10:05",
+    "repetir": "No repetir",
+    "importante": false,
+    "dias": [],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "fecha": "2025-12-04",
+    "id": 3,
+    "eliminado": false,
+    "completado": true,
+    "fecha_completado": "2025-12-01"
+  },
+  {
+    "titulo": "test 2",
+    "hora": "10:05",
+    "repetir": "No repetir",
+    "importante": false,
+    "dias": [],
+    "mantener": false,
+    "alarma": false,
+    "sonido": "JHON CENA SATURED",
+    "fecha": "2025-11-30",
+    "id": 4,
+    "eliminado": false,
+    "completado": true,
+    "fecha_completado": "2025-12-01"
   }
 ]
