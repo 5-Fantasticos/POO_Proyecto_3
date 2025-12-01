@@ -1,6 +1,7 @@
 import tkinter as tk
 from datetime import datetime
 from modelo import *
+from tkinter import messagebox
     
 # Pantalla de inicio con opciones de usuario y administrador
 class PantallaInicio(tk.Frame):
@@ -16,7 +17,14 @@ class PantallaInicio(tk.Frame):
         self.frame_botones = tk.Frame(self, bg="white")
         self.frame_botones.pack(pady=40)
 
-        self.btn_usuario = tk.Button(self.frame_botones, text="Usuario", width=10, height=5, font=("Arial", 12))
+        self.btn_usuario = tk.Button(
+            self.frame_botones,
+            text="Usuario",
+            width=10,
+            height=5,
+            font=("Arial", 12),
+            command=master.mostrar_vista_usuario  # ← aquí añadimos el comando
+        )
         self.btn_usuario.pack(side="left", padx=20)
 
         self.btn_admin = tk.Button(self.frame_botones, text="Administrador", width=10, height=5, font=("Arial", 12), command=mostrar_vista_principal)
@@ -100,14 +108,21 @@ class VistaAnadirRecordatorio(tk.Frame):
         self.label_dias.pack()
         self.frame_dias = tk.Frame(self, bg="white")
         self.frame_dias.pack()
+
+        self.check_vars = {}  # Diccionario para guardar las variables de cada día
         for dia in ["LUN", "MAR", "MIE", "JUE", "VIE", "SAB", "DOM"]:
-            tk.Checkbutton(self.frame_dias, text=dia, bg="white").pack(side="left") # Checkbuttons para cada dia
+            var = tk.BooleanVar()
+            cb = tk.Checkbutton(self.frame_dias, text=dia, variable=var, bg="white")
+            cb.pack(side="left")
+            self.check_vars[dia] = var
 
         # Opciones adicionales
-        self.check_mantener = tk.Checkbutton(self, text="Mantener", bg="white")
+        self.var_mantener = tk.BooleanVar()
+        self.check_mantener = tk.Checkbutton(self, text="Mantener", variable=self.var_mantener, bg="white")
         self.check_mantener.pack(pady=2)
 
-        self.check_alarma = tk.Checkbutton(self, text="Alarma", bg="white")
+        self.var_alarma = tk.BooleanVar()
+        self.check_alarma = tk.Checkbutton(self, text="Alarma", variable=self.var_alarma, bg="white")
         self.check_alarma.pack(pady=2)
 
         # Opción para seleccionar el sonido
@@ -117,9 +132,31 @@ class VistaAnadirRecordatorio(tk.Frame):
         self.option_sonido = tk.OptionMenu(self, self.sonido_var, "JHON CENA SATURED", "Otro sonido")
         self.option_sonido.pack()
 
-        # Boton para volver a la vista principal
+        # Botón Añadir
+        self.boton_añadir = tk.Button(self, text="Añadir", command=self.guardar_recordatorio)
+        self.boton_añadir.pack(pady=10)
+
+        # Botón Volver
         self.boton_volver = tk.Button(self, text="Volver", command=volver_callback)
         self.boton_volver.pack(side="bottom", pady=10)
+
+    def guardar_recordatorio(self):
+        titulo = self.entry_titulo.get()
+        hora = self.entry_hora.get()
+        dias = [dia for dia, var in self.check_vars.items() if var.get()]
+        mantener = self.var_mantener.get()
+        alarma = self.var_alarma.get()
+        sonido = self.sonido_var.get()
+        creador = "Administrador"  # o "Usuario" si implementas roles
+
+        if not titulo or not hora:
+            messagebox.showerror("Error", "Título y hora son obligatorios")
+            return
+
+        evento = Evento(titulo, hora, dias, creador, estado="pendiente", nombre_alarma=sonido)
+        evento.guardar()
+        messagebox.showinfo("Éxito", "Recordatorio añadido correctamente")
+
 
 # Vista principal con opciones para el administrador
 class VistaPrincipal(tk.Frame):
@@ -150,6 +187,9 @@ class VistaPrincipal(tk.Frame):
 
         self.bottom_bar = tk.Frame(self, bg="white", height=40)
         self.bottom_bar.pack(fill="x", side="bottom")
+
+        self.btn_volver_inicio = tk.Button(self.bottom_bar, text="Volver al inicio", command=master.mostrar_inicio)
+        self.btn_volver_inicio.pack(pady=5)
 
 # Aplicación principal que maneja las diferentes vistas
 class App(tk.Tk):
@@ -185,6 +225,63 @@ class App(tk.Tk):
     def limpiar_frames(self):
         for widget in self.winfo_children():
             widget.destroy()
+    
+    def mostrar_vista_usuario(self):
+        self.limpiar_frames()
+        self.vista_usuario = VistaUsuario(self, self.mostrar_inicio)
+    
+    def mostrar_inicio(self):
+        self.limpiar_frames()
+        self.pantalla_inicio = PantallaInicio(self, self.mostrar_vista_principal)
+
+# Vista para el usuario que muestra sus recordatorios
+class VistaUsuario(tk.Frame):
+    def __init__(self, master, volver_callback):
+        super().__init__(master, bg="white")
+        self.pack(fill="both", expand=True)
+
+        self.label_titulo = tk.Label(self, text="RECORDATORIOS DEL USUARIO", font=("Arial", 14, "bold"), bg="white")
+        self.label_titulo.pack(pady=10)
+
+        eventos = Evento.leer_eventos_json()
+
+        if not eventos:
+            tk.Label(self, text="No hay recordatorios guardados", bg="white").pack(pady=10)
+        else:
+            self.eventos_json = eventos  # Guardamos los datos para saber qué se selecciona
+            self.lista = tk.Listbox(self, width=40, height=10, selectmode=tk.MULTIPLE)
+            self.lista.pack(pady=10)
+            for e in eventos:
+                texto = f"{e['hora']} - {e['titulo']} ({', '.join(e['dias'])})"
+                if e["estado"] == "completado":
+                    texto += " ✅"
+                self.lista.insert(tk.END, texto)
+
+            self.btn_marcar = tk.Button(self, text="Marcar como realizado", command=self.marcar_realizado)
+            self.btn_marcar.pack(pady=5)
+
+        self.btn_volver_inicio = tk.Button(self, text="Volver al inicio", command=volver_callback)
+        self.btn_volver_inicio.pack(pady=10)
+
+    # Función para marcar tareas como realizadas
+    def marcar_realizado(self):
+        seleccionados = self.lista.curselection()
+        if not seleccionados:
+            messagebox.showinfo("Aviso", "Selecciona al menos una tarea")
+            return
+
+        eventos = Evento.leer_eventos_json()
+        for i in seleccionados:
+            eventos[i]["estado"] = "completado"
+            Evento.registrar_historial(eventos[i]["titulo"], "Usuario", "marco como realizado")
+
+        with open("eventos.json", "w", encoding="utf-8") as f:
+            json.dump(eventos, f, indent=4, ensure_ascii=False)
+
+        messagebox.showinfo("Éxito", "Tareas marcadas como realizadas")
+        self.master.mostrar_vista_usuario()  # Recarga la vista
+
+
 
 # Punto de entrada de la aplicación
 if __name__ == "__main__":
