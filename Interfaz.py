@@ -163,7 +163,7 @@ class UsuarioScreen(tk.Frame):
     def __init__(self, master, controlador):
         super().__init__(master, bg=BG)
         self.controlador = controlador
-        header(self, title="Mi medicación", subtitle="Recordatorios pendientes").pack(fill="x")
+        header(self, title="Usuario", subtitle="Recordatorios pendientes").pack(fill="x")
         # Tarjeta principal
         card = tk.Frame(self, bg="#fff", bd=0, relief="ridge", highlightbackground="#e0e0e0", highlightthickness=2)
         card.pack(expand=True, fill="both", padx=40, pady=10)
