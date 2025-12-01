@@ -9,6 +9,7 @@ class App(tk.Tk):
         self.configure(bg="#24102b")
         self.controlador = controlador
         self.frames = {}
+        self.pantalla_anterior = None  # <-- Agrega esto
         # Pasa el controlador a cada pantalla
         for F in (InicioScreen, UsuarioScreen, PrincipalScreen, RealizadasScreen, RecordatorioScreen, ListaRecordatoriosScreen):
             frame = F(self, controlador)
@@ -16,10 +17,13 @@ class App(tk.Tk):
             frame.place(relwidth=1, relheight=1)
         self.cambiar_pantalla("InicioScreen")
 
-    def cambiar_pantalla(self, nombre):
+    def cambiar_pantalla(self, nombre, anterior=None):
         for f in self.frames.values():
             f.place_forget()
         self.frames[nombre].place(relwidth=1, relheight=1)
+        # Guarda la pantalla anterior si se pasa
+        if anterior:
+            self.pantalla_anterior = anterior
         # Llama a métodos de actualización si existen
         frame = self.frames[nombre]
         if hasattr(frame, "actualizar"):
@@ -86,9 +90,9 @@ class UsuarioScreen(tk.Frame):
         # Botones de acciones
         btns = tk.Frame(self, bg="#24102b")
         btns.pack(pady=10)
-        colored_button(btns, "Crear evento", lambda: master.cambiar_pantalla("RecordatorioScreen"), size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
+        colored_button(btns, "Crear evento", lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="UsuarioScreen"), size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
         colored_button(btns, "Eliminar evento", self.eliminar_evento, size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
-        colored_button(btns, "Ver realizadas", lambda: master.cambiar_pantalla("RealizadasScreen"), size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
+        colored_button(btns, "Ver realizadas", lambda: master.cambiar_pantalla("RealizadasScreen", anterior="UsuarioScreen"), size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
         colored_button(self, "Volver", lambda: master.cambiar_pantalla("InicioScreen"), size=14).pack(pady=8, ipadx=10, ipady=5)
         # Variable para saber qué tarea está seleccionada para eliminar
         self.tarea_seleccionada = tk.IntVar(value=0)
@@ -152,8 +156,8 @@ class PrincipalScreen(tk.Frame):
         tk.Frame(self, height=80, bg="#24102b").pack()
         btn_frame = tk.Frame(self, bg="#24102b")
         btn_frame.pack(pady=20)
-        colored_button(btn_frame, "Tareas realizadas", lambda: master.cambiar_pantalla("RealizadasScreen"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
-        colored_button(btn_frame, "Crear Recordatorio", lambda: master.cambiar_pantalla("RecordatorioScreen"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Tareas realizadas", lambda: master.cambiar_pantalla("RealizadasScreen", anterior="PrincipalScreen"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
+        colored_button(btn_frame, "Crear Recordatorio", lambda: master.cambiar_pantalla("RecordatorioScreen", anterior="PrincipalScreen"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
         colored_button(btn_frame, "Eliminar Recordatorio", lambda: master.mostrar_lista("eliminar"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
         colored_button(btn_frame, "Modificar Recordatorio", lambda: master.mostrar_lista("modificar"), size=20).pack(fill="x", pady=7, ipadx=10, ipady=10)
         colored_button(btn_frame, "Inicio", lambda: master.cambiar_pantalla("InicioScreen"), size=16).pack(fill="x", pady=7, ipadx=10, ipady=7)
@@ -164,7 +168,7 @@ class ListaRecordatoriosScreen(tk.Frame):
         dark_label(self, "Selecciona un recordatorio", size=18, bold=True).pack(pady=10)
         self.contenedor_lista = tk.Frame(self, bg="#24102b")
         self.contenedor_lista.pack(expand=True, fill="both")
-        colored_button(self, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
+        colored_button(self, "Volver", lambda: master.cambiar_pantalla(master.pantalla_anterior or "PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
 
 class RealizadasScreen(tk.Frame):
     def __init__(self, master, controlador):
@@ -201,7 +205,7 @@ class RealizadasScreen(tk.Frame):
         # Lista de tareas realizadas
         self.realizadas_cont = tk.Frame(self, bg="#24102b")
         self.realizadas_cont.pack(expand=True, fill="both", pady=10)
-        colored_button(self, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
+        colored_button(self, "Volver", lambda: master.cambiar_pantalla(master.pantalla_anterior or "PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
 
 class RecordatorioScreen(tk.Frame):
     def __init__(self, master, controlador):
@@ -247,7 +251,12 @@ class RecordatorioScreen(tk.Frame):
         btn_frame = tk.Frame(self, bg="#24102b")
         btn_frame.pack(fill="x", pady=10)
         colored_button(btn_frame, "Crear", master.crear_recordatorio, size=14).pack(side="left", padx=10, ipadx=10, ipady=5)
-        colored_button(btn_frame, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(side="left", padx=10, ipadx=10, ipady=5)
+        colored_button(
+            btn_frame,
+            "Volver",
+            lambda: master.cambiar_pantalla(master.pantalla_anterior or "PrincipalScreen"),
+            size=14
+        ).pack(side="left", padx=10, ipadx=10, ipady=5)
 
 if __name__ == "__main__":
     app = App()
