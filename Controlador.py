@@ -33,7 +33,8 @@ class Controlador:
             for r in pendientes:
                 texto = f"[{r.get('id')}] {r.get('titulo','')} - {r.get('hora','')}"
                 import tkinter as tk
-                lbl = tk.Label(frame.usuario_cont, text=texto, fg="white", bg="#24102b", anchor="w")
+                # match Interfaz palette (card background with dark text)
+                lbl = tk.Label(frame.usuario_cont, text=texto, fg="#0f1722", bg="#ffffff", anchor="w")
                 lbl.pack(fill="x", padx=8, pady=2)
 
     def crear_recordatorio(self, datos):
