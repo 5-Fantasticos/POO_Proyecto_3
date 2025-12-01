@@ -3,19 +3,14 @@
 import json
 import os
 from datetime import datetime
-import threading
-from altavoz import leer_tareas_pendientes
 import sys
 
 class MemoriaModelo:
     """Lógica y gestión de datos para la aplicación de recordatorios."""
 
     def __init__(self):
-        # Resolver ruta de datos soportando ejecución congelada (PyInstaller)
-        if getattr(sys, 'frozen', False):
-            base_dir = os.path.dirname(sys.executable)
-        else:
-            base_dir = os.path.dirname(__file__)
+        # Siempre busca el recordatorios.json en la carpeta del proyecto
+        base_dir = os.path.dirname(os.path.abspath(__file__))
         self.data_path = os.path.join(base_dir, 'recordatorios.json')
         # Filtros
         self.filtro_realizadas = 'prioritarias'
@@ -37,6 +32,7 @@ class MemoriaModelo:
         datos = self.cargar_todos()
         next_id = (max((r.get('id', 0) for r in datos), default=0) + 1) if datos else 1
         rec['id'] = next_id
+        rec['eliminado'] = False  # Nuevo campo
         if 'completado' not in rec:
             rec['completado'] = False
         datos.append(rec)
@@ -56,7 +52,10 @@ class MemoriaModelo:
             json.dump(datos, f, ensure_ascii=False, indent=2)
 
     def eliminar_recordatorio(self, rec_id):
-        datos = [r for r in self.cargar_todos() if r.get('id') != rec_id]
+        datos = self.cargar_todos()
+        for r in datos:
+            if r.get('id') == rec_id:
+                r['eliminado'] = True
         with open(self.data_path, 'w', encoding='utf-8') as f:
             json.dump(datos, f, ensure_ascii=False, indent=2)
 
@@ -71,13 +70,17 @@ class MemoriaModelo:
         with open(self.data_path, 'w', encoding='utf-8') as f:
             json.dump(datos, f, ensure_ascii=False, indent=2)
 
-    def leer_pendientes(self):
-        """Lanza lectura TTS de las tareas pendientes en un hilo separado."""
-        datos = [r for r in self.cargar_todos() if not r.get('completado')]
-        threading.Thread(target=leer_tareas_pendientes, args=(datos,), daemon=True).start()
+    def obtener_historial(self):
+        return self.cargar_todos()  # Devuelve todos, incluidos eliminados
+
+    def obtener_pendientes(self, solo_no_eliminados=True):
+        datos = self.cargar_todos()
+        if solo_no_eliminados:
+            return [r for r in datos if not r.get('completado') and not r.get('eliminado')]
+        else:
+            return [r for r in datos if not r.get('completado')]
 
     def actualizar_recurrencias(self):
-        """Reactiva tareas completadas cuyo periodo de repetición ya pasó."""
         datos = self.cargar_todos()
         if not datos:
             return

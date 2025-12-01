@@ -2,14 +2,16 @@ import tkinter as tk
 from tkinter import ttk
 
 class App(tk.Tk):
-    def __init__(self):
+    def __init__(self, controlador=None):
         super().__init__()
         self.title("Recordatorios")
         self.geometry("600x700")
         self.configure(bg="#24102b")
+        self.controlador = controlador
         self.frames = {}
+        # Pasa el controlador a cada pantalla
         for F in (InicioScreen, UsuarioScreen, PrincipalScreen, RealizadasScreen, RecordatorioScreen, ListaRecordatoriosScreen):
-            frame = F(self)
+            frame = F(self, controlador)
             self.frames[F.__name__] = frame
             frame.place(relwidth=1, relheight=1)
         self.cambiar_pantalla("InicioScreen")
@@ -18,11 +20,16 @@ class App(tk.Tk):
         for f in self.frames.values():
             f.place_forget()
         self.frames[nombre].place(relwidth=1, relheight=1)
+        # Llama a métodos de actualización si existen
+        frame = self.frames[nombre]
+        if hasattr(frame, "actualizar"):
+            frame.actualizar()
+
+    def leer_pendientes(self):
+        if self.controlador:
+            self.controlador.actualizar_pendientes_usuario()
 
     # Métodos de ejemplo para enlazar con botones
-    def leer_pendientes(self):
-        pass
-
     def mostrar_lista(self, modo):
         self.cambiar_pantalla("ListaRecordatoriosScreen")
 
@@ -57,7 +64,7 @@ def day_toggle(parent, text, var):
 
 # Pantallas
 class InicioScreen(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, controlador):
         super().__init__(master, bg="#24102b")
         tk.Label(self, bg="#24102b").pack(pady=20)
         dark_label(self, "HOLA!!", size=24, bold=True).pack(pady=10)
@@ -67,19 +74,80 @@ class InicioScreen(tk.Frame):
         colored_button(btn_frame, "Administrador", lambda: master.cambiar_pantalla("PrincipalScreen"), size=18).grid(row=0, column=1, padx=20, ipadx=10, ipady=10)
 
 class UsuarioScreen(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, controlador):
         super().__init__(master, bg="#24102b")
+        self.controlador = controlador
         dark_label(self, "Recordatorios Pendientes", size=20, bold=True).pack(pady=10)
-        tk.Frame(self, height=35, bg="#24102b").pack()
+        tk.Frame(self, height=20, bg="#24102b").pack()
         cont = tk.Frame(self, bg="#24102b")
         cont.pack(expand=True, fill="both")
         self.usuario_cont = tk.Frame(cont, bg="#24102b")
         self.usuario_cont.pack(expand=True, fill="both")
-        colored_button(self, "Leer pendientes", master.leer_pendientes, size=14).pack(pady=8, ipadx=10, ipady=5)
+        # Botones de acciones
+        btns = tk.Frame(self, bg="#24102b")
+        btns.pack(pady=10)
+        colored_button(btns, "Crear evento", lambda: master.cambiar_pantalla("RecordatorioScreen"), size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
+        colored_button(btns, "Eliminar evento", self.eliminar_evento, size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
+        colored_button(btns, "Ver realizadas", lambda: master.cambiar_pantalla("RealizadasScreen"), size=14).pack(side="left", padx=8, ipadx=10, ipady=5)
         colored_button(self, "Volver", lambda: master.cambiar_pantalla("InicioScreen"), size=14).pack(pady=8, ipadx=10, ipady=5)
+        # Variable para saber qué tarea está seleccionada para eliminar
+        self.tarea_seleccionada = tk.IntVar(value=0)
+
+    def actualizar(self):
+        # Muestra tareas no eliminadas y no completadas, con checkbox para marcar como completadas
+        if self.controlador:
+            pendientes = self.controlador.modelo.obtener_pendientes()
+            # Limpiar
+            for widget in self.usuario_cont.winfo_children():
+                widget.destroy()
+            self.check_vars = []
+            self.id_map = []
+            for r in pendientes:
+                var = tk.BooleanVar(value=False)
+                frame = tk.Frame(self.usuario_cont, bg="#24102b")
+                frame.pack(fill="x", padx=8, pady=2)
+                chk = tk.Checkbutton(frame, variable=var, bg="#24102b", selectcolor="#660080",
+                                     command=lambda rid=r['id'], v=var: self.marcar_completado(rid, v))
+                chk.pack(side="left")
+                lbl = tk.Label(frame, text=f"[{r.get('id')}] {r.get('titulo','')} - {r.get('hora','')}",
+                               fg="white", bg="#24102b", anchor="w")
+                lbl.pack(side="left", padx=6)
+                # Radio para seleccionar para eliminar
+                radio = tk.Radiobutton(frame, variable=self.tarea_seleccionada, value=r['id'], bg="#24102b")
+                radio.pack(side="right")
+                self.check_vars.append(var)
+                self.id_map.append(r['id'])
+
+    def marcar_completado(self, rec_id, var):
+        if var.get():
+            self.controlador.marcar_completado(rec_id)
+
+    def eliminar_evento(self):
+        rec_id = self.tarea_seleccionada.get()
+        if rec_id:
+            self.controlador.eliminar_recordatorio(rec_id)
+            self.tarea_seleccionada.set(0)
+
+    def mostrar_lista(self, modo):
+        self.cambiar_pantalla("ListaRecordatoriosScreen")
+
+    def crear_recordatorio(self):
+        pass
+
+    def cambiar_filtro_realizadas(self, filtro):
+        pass
+
+    def cambiar_filtro_dia_realizadas(self, dia):
+        pass
+
+    def cambiar_filtro_semana_realizadas(self, semana):
+        pass
+
+    def cambiar_filtro_mes_realizadas(self, mes):
+        pass
 
 class PrincipalScreen(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, controlador):
         super().__init__(master, bg="#24102b")
         tk.Frame(self, height=80, bg="#24102b").pack()
         btn_frame = tk.Frame(self, bg="#24102b")
@@ -91,7 +159,7 @@ class PrincipalScreen(tk.Frame):
         colored_button(btn_frame, "Inicio", lambda: master.cambiar_pantalla("InicioScreen"), size=16).pack(fill="x", pady=7, ipadx=10, ipady=7)
 
 class ListaRecordatoriosScreen(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, controlador):
         super().__init__(master, bg="#24102b")
         dark_label(self, "Selecciona un recordatorio", size=18, bold=True).pack(pady=10)
         self.contenedor_lista = tk.Frame(self, bg="#24102b")
@@ -99,7 +167,7 @@ class ListaRecordatoriosScreen(tk.Frame):
         colored_button(self, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
 
 class RealizadasScreen(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, controlador):
         super().__init__(master, bg="#24102b")
         dark_label(self, "Tareas realizadas", size=20, bold=True).pack(pady=10)
         filtro_frame = tk.Frame(self, bg="#24102b")
@@ -136,7 +204,7 @@ class RealizadasScreen(tk.Frame):
         colored_button(self, "Volver", lambda: master.cambiar_pantalla("PrincipalScreen"), size=14).pack(pady=10, ipadx=10, ipady=5)
 
 class RecordatorioScreen(tk.Frame):
-    def __init__(self, master):
+    def __init__(self, master, controlador):
         super().__init__(master, bg="#24102b")
         cont = tk.Frame(self, bg="#24102b")
         cont.pack(expand=True, fill="both", padx=16, pady=10)

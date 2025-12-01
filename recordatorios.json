@@ -8,8 +8,9 @@
     "sonido": "JHON CENA SATURED",
     "importante": true,
     "repetir": "No repetir",
-    "completado": false,
-    "id": 1
+    "completado": true,
+    "id": 1,
+    "fecha_completado": "2025-12-01"
   },
   {
     "titulo": "pollo",

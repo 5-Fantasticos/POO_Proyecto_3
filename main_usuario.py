@@ -1,12 +1,12 @@
-"""Main unificado para usuario y pariente (administrador) usando Tkinter."""
+"""Main solo para mostrar la pantalla del usuario usando Tkinter."""
 
-import tkinter as tk
-from Interfaz import App  # Usa la clase App de la migración Tkinter
+from Controlador import Controlador
 
 def main():
-    root_app = App()
-    root_app.cambiar_pantalla("UsuarioScreen")
-    root_app.mainloop()
+    # Usar el controlador para que la interfaz se conecte al modelo y lea el .json
+    controlador = Controlador()
+    controlador.vista.cambiar_pantalla("UsuarioScreen")
+    controlador.ejecutar()
 
 if __name__ == "__main__":
     main()
