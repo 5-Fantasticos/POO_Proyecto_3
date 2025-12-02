@@ -246,36 +246,90 @@ class ListaRecordatoriosScreen(tk.Frame):
             lbl.bind("<Button-3>", lambda e, rec=r: self.eliminar_evento_confirmar(rec))
 
     def abrir_edicion_recordatorio(self, rec):
-        app = self.master
-        app.cambiar_pantalla("RecordatorioScreen", anterior="ListaRecordatoriosScreen")
-        recordatorio_screen = app.frames.get("RecordatorioScreen")
-        if recordatorio_screen:
-            recordatorio_screen.titulo_input.delete(0, tk.END)
-            recordatorio_screen.titulo_input.insert(0, rec.get("titulo", ""))
-            recordatorio_screen.hora_input.delete(0, tk.END)
-            recordatorio_screen.hora_input.insert(0, rec.get("hora", ""))
-            recordatorio_screen.repetir_var.set(rec.get("repetir", "No repetir"))
-            recordatorio_screen.importante_chk.set(rec.get("importante", False))
-            dias = rec.get("dias", [])
-            for i, dia in enumerate(["LUN","MAR","MIE","JUE","VIE","SAB","DOM"]):
-                recordatorio_screen.dias_vars[i].set(dia in dias)
-            recordatorio_screen.mantener_chk.set(rec.get("mantener", False))
-            recordatorio_screen.alarma_chk.set(rec.get("alarma", False))
-            recordatorio_screen.sonido_var.set(rec.get("sonido", "JHON CENA SATURED"))
-            recordatorio_screen.set_fecha(rec.get("fecha", ""))
-            recordatorio_screen.id_edicion = rec.get("id")
-            # Cambia el botón "Crear" por "Guardar cambios"
-            for widget in recordatorio_screen.children.values():
-                if isinstance(widget, tk.Frame):
-                    for btn in widget.winfo_children():
-                        if isinstance(btn, ttk.Button) and "Crear" in btn.cget("text"):
-                            btn.config(text="Guardar cambios", command=lambda: self.master.guardar_cambios_recordatorio(recordatorio_screen))
-            # Botón volver funcional en edición
-            for widget in recordatorio_screen.children.values():
-                if isinstance(widget, tk.Frame):
-                    for btn in widget.winfo_children():
-                        if isinstance(btn, ttk.Button) and "Volver" in btn.cget("text"):
-                            btn.config(command=lambda: self.master.cambiar_pantalla("ListaRecordatoriosScreen"))
+        import tkinter as tk
+        from tkinter import ttk, messagebox
+        top = tk.Toplevel(self)
+        top.title("Editar recordatorio")
+        top.geometry("500x600")
+        top.configure(bg=BG)
+        # --- Campos ---
+        def info_label(parent, text, size=12):
+            return tk.Label(parent, text=text, fg=MUTED, bg=BG, anchor="w", font=("Segoe UI", size))
+        cont = tk.Frame(top, bg="#fff")
+        cont.pack(expand=True, fill="both", padx=16, pady=10)
+        info_label(cont, "Título").pack(anchor="w")
+        titulo_input = ttk.Entry(cont)
+        titulo_input.pack(fill="x", pady=2)
+        titulo_input.insert(0, rec.get("titulo", ""))
+        info_label(cont, "Hora (HH:MM)").pack(anchor="w")
+        hora_input = ttk.Entry(cont)
+        hora_input.pack(fill="x", pady=2)
+        hora_input.insert(0, rec.get("hora", ""))
+        info_label(cont, "Repetir").pack(anchor="w")
+        repetir_var = tk.StringVar(value=rec.get("repetir", "No repetir"))
+        ttk.Combobox(cont, textvariable=repetir_var, values=["No repetir","Diariamente","Semanalmente","Mensualmente"]).pack(fill="x", pady=2)
+        imp_frame = tk.Frame(cont, bg="#fff")
+        imp_frame.pack(fill="x", pady=2)
+        info_label(imp_frame, "Importante").pack(side="left")
+        importante_chk = tk.BooleanVar(value=rec.get("importante", False))
+        tk.Checkbutton(imp_frame, variable=importante_chk, bg=CARD, selectcolor=ACCENT).pack(side="left")
+        info_label(cont, "Días de recordatorio").pack(anchor="w")
+        dias_frame = tk.Frame(cont, bg="#fff")
+        dias_frame.pack(fill="x", pady=2)
+        dias_vars = [tk.BooleanVar(value=False) for _ in range(7)]
+        for i, dia in enumerate(["LUN","MAR","MIE","JUE","VIE","SAB","DOM"]):
+            dias_vars[i].set(dia in rec.get("dias", []))
+            tk.Checkbutton(dias_frame, text=dia, variable=dias_vars[i], fg=PRIMARY, bg=BG, selectcolor=SHADOW, font=("Segoe UI", 10, "bold")).pack(side="left", padx=3)
+        mant_frame = tk.Frame(cont, bg="#fff")
+        mant_frame.pack(fill="x", pady=2)
+        info_label(mant_frame, "Mantener").pack(side="left")
+        mantener_chk = tk.BooleanVar(value=rec.get("mantener", False))
+        tk.Checkbutton(mant_frame, variable=mantener_chk, bg=CARD, selectcolor=ACCENT).pack(side="left")
+        alarma_frame = tk.Frame(cont, bg="#fff")
+        alarma_frame.pack(fill="x", pady=2)
+        info_label(alarma_frame, "Alarma").pack(side="left")
+        alarma_chk = tk.BooleanVar(value=rec.get("alarma", False))
+        tk.Checkbutton(alarma_frame, variable=alarma_chk, bg=CARD, selectcolor=ACCENT).pack(side="left")
+        info_label(cont, "Sonido").pack(anchor="w")
+        sonido_var = tk.StringVar(value=rec.get("sonido", "JHON CENA SATURED"))
+        ttk.Combobox(cont, textvariable=sonido_var, values=["JHON CENA SATURED", "Otro sonido"]).pack(fill="x", pady=2)
+        # Fecha
+        fecha = rec.get("fecha", "")
+        label_fecha = tk.Label(cont, text=f"Fecha seleccionada: {fecha}", fg=PRIMARY, bg="#fff", font=("Segoe UI", 12, "bold"))
+        label_fecha.pack(pady=5)
+        # --- Botones ---
+        def guardar():
+            titulo = titulo_input.get().strip()
+            hora = hora_input.get().strip()
+            repetir = repetir_var.get()
+            importante = importante_chk.get()
+            dias = [dia for i, dia in enumerate(["LUN","MAR","MIE","JUE","VIE","SAB","DOM"]) if dias_vars[i].get()]
+            mantener = mantener_chk.get()
+            alarma = alarma_chk.get()
+            sonido = sonido_var.get()
+            if not titulo or not hora or not fecha:
+                messagebox.showerror("Error", "Debes completar título, hora y fecha.")
+                return
+            datos = {
+                "titulo": titulo,
+                "hora": hora,
+                "repetir": repetir,
+                "importante": importante,
+                "dias": dias,
+                "mantener": mantener,
+                "alarma": alarma,
+                "sonido": sonido,
+                "fecha": fecha,
+                "id": rec.get("id")
+            }
+            self.controlador.modelo.actualizar_recordatorio(rec.get("id"), datos)
+            if hasattr(self, "actualizar"):
+                self.actualizar()
+            top.destroy()
+        btns = tk.Frame(top, bg="#fff")
+        btns.pack(pady=10)
+        ttk.Button(btns, text="Guardar cambios", command=guardar).pack(side="left", padx=10, ipadx=10, ipady=5)
+        ttk.Button(btns, text="Cancelar", command=top.destroy).pack(side="left", padx=10, ipadx=10, ipady=5)
 
     def eliminar_evento_confirmar(self, rec):
         from tkinter import messagebox
@@ -379,22 +433,26 @@ class RecordatorioScreen(tk.Frame):
         # Botones
         btn_frame = tk.Frame(card, bg="#fff")
         btn_frame.pack(fill="x", pady=10)
-        colored_button(
+        self.btn_crear = colored_button(
             btn_frame,
             "Crear",
-            controlador.crear_recordatorio_desde_vista,  # <-- Cambia aquí
+            controlador.crear_recordatorio_desde_vista,
             size=14,
             icon="✅"
-        ).pack(side="left", padx=10, ipadx=10, ipady=5)
-        colored_button(
+        )
+        self.btn_crear.pack(side="left", padx=10, ipadx=10, ipady=5)
+        self.btn_volver = colored_button(
             btn_frame,
             "Volver",
             lambda: master.cambiar_pantalla(master.pantalla_anterior or "PrincipalScreen"),
             size=14,
             icon="🔙"
-        ).pack(side="left", padx=10, ipadx=10, ipady=5)
+        )
+        self.btn_volver.pack(side="left", padx=10, ipadx=10, ipady=5)
         # Footer
         tk.Label(self, text="Hecho con ❤️ por tu equipo", font=("Segoe UI", 10), fg=PRIMARY, bg=BG).pack(side="bottom", pady=18)
+        # Inicializa id_edicion en None
+        self.id_edicion = None
 
     def set_fecha(self, fecha_str):
         self.fecha_seleccionada = fecha_str
@@ -509,5 +567,7 @@ class App(tk.Tk):
         recordatorio_screen = self.frames.get("RecordatorioScreen")
         if recordatorio_screen and hasattr(recordatorio_screen, "set_fecha"):
             recordatorio_screen.set_fecha(fecha_str)
+            # Asegura que no haya id_edicion previa
+            recordatorio_screen.id_edicion = None
 
 setattr(App, "guardar_cambios_recordatorio", guardar_cambios_recordatorio)
