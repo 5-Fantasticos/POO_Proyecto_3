@@ -159,3 +159,10 @@ class MemoriaModelo:
         nombres = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre']
         return nombres[num-1] if 1 <= num <= 12 else ''
 
+    def registrar_historial(self, evento_id, rol, accion):
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        historial_path = os.path.join(base_dir, 'historial.txt')
+        with open(historial_path, "a", encoding="utf-8") as f:
+            f.write(f"{evento_id}|{rol}|{accion}|{timestamp}\n")
