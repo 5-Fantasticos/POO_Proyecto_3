@@ -18,6 +18,7 @@ class MemoriaModelo:
         self.filtro_semana_realizadas = 'todas'
         self.filtro_mes_realizadas = 'todos'
         self._rec_edit_id = None
+        self.recordatorios = []  # Inicializar la lista de recordatorios
 
     def cargar_todos(self):
         if not os.path.exists(self.data_path):
@@ -125,6 +126,15 @@ class MemoriaModelo:
         if modifico:
             with open(self.data_path, 'w', encoding='utf-8') as f:
                 json.dump(datos, f, ensure_ascii=False, indent=2)
+
+    def generar_nuevo_id(self):
+        """Genera un ID único para cada recordatorio."""
+        if not hasattr(self, 'recordatorios'):
+            self.recordatorios = []
+        if not self.recordatorios:
+            return 1
+        ids = [r.get("id", 0) for r in self.recordatorios if isinstance(r, dict)]
+        return max(ids, default=0) + 1
 
     # Métodos auxiliares para filtros y calendario
     def dias_en_mes(self, mes, anio):
