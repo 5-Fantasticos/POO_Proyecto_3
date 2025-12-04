@@ -6,6 +6,7 @@ class Controlador:
     def __init__(self):
         self._asegurar_archivo_json()
         self.modelo = MemoriaModelo()
+        self.rol_actual = "Usuario" 
         self.vista = App(controlador=self)
         # Al iniciar, muestra los pendientes si está en UsuarioScreen
         self.actualizar_pendientes_usuario()
@@ -29,18 +30,11 @@ class Controlador:
             r for r in self.modelo.cargar_todos()
             if not r.get('completado') and not r.get('eliminado') and r.get('fecha') == hoy.strftime("%Y-%m-%d")
         ]
+        # Delegate rendering to the view so it can decide how to present/scroll items.
         frame = self.vista.frames.get("UsuarioScreen")
-        if frame and hasattr(frame, "usuario_cont"):
-            # Limpia el contenedor
-            for widget in frame.usuario_cont.winfo_children():
-                widget.destroy()
-            # Muestra cada recordatorio pendiente, mostrando la fecha real del recordatorio
-            for r in pendientes:
-                fecha = r.get('fecha', '')
-                texto = f"[{r.get('id')}] {r.get('titulo','')} - {fecha} {r.get('hora','')}"
-                import tkinter as tk
-                lbl = tk.Label(frame.usuario_cont, text=texto, fg="#0f1722", bg="#ffffff", anchor="w")
-                lbl.pack(fill="x", padx=8, pady=2)
+        if frame and hasattr(frame, "actualizar"):
+            # Allow the screen to manage its own rendering (scrollable + two groups)
+            frame.actualizar()
 
         # Actualiza el contador de pendientes en la pantalla de inicio
         self.actualizar_resumen_inicio(len(pendientes))
@@ -94,16 +88,21 @@ class Controlador:
                 lbl.pack(fill="x", padx=8, pady=2)
 
     def crear_recordatorio(self, datos):
-        self.modelo.guardar_recordatorio(datos)
+        rec_id = self.modelo.guardar_recordatorio(datos)
+        self.modelo.registrar_historial(rec_id, self.rol_actual, "creó recordatorio")
         self.actualizar_pendientes_usuario()
+
 
     def eliminar_recordatorio(self, rec_id):
         self.modelo.eliminar_recordatorio(rec_id)
+        self.modelo.registrar_historial(rec_id, self.rol_actual, "eliminó recordatorio")
         self.actualizar_pendientes_usuario()
 
     def marcar_completado(self, rec_id):
-        self.modelo.marcar_completado(rec_id)
-        self.actualizar_pendientes_usuario()
+        if self.rol_actual == "Usuario":
+            self.modelo.marcar_completado(rec_id)
+            self.modelo.registrar_historial(rec_id, "Usuario", "marcó como completado")
+            self.actualizar_pendientes_usuario()
 
     def obtener_recordatorios(self):
         return self.modelo.cargar_todos()
@@ -117,38 +116,24 @@ class Controlador:
         calendario.seleccionar_fecha(self.vista.abrir_plantilla_agregar_evento)
 
     def crear_recordatorio_desde_vista(self):
-        # Obtiene la pantalla de agregar recordatorio
-        recordatorio_screen = self.vista.frames.get("RecordatorioScreen")
-        if not recordatorio_screen:
-            return
-        # Obtiene los datos del formulario
-        titulo = recordatorio_screen.titulo_input.get().strip()
-        hora = recordatorio_screen.hora_input.get().strip()
-        repetir = recordatorio_screen.repetir_var.get()
-        importante = recordatorio_screen.importante_chk.get()
-        dias = [dia for i, dia in enumerate(["LUN","MAR","MIE","JUE","VIE","SAB","DOM"]) if recordatorio_screen.dias_vars[i].get()]
-        mantener = recordatorio_screen.mantener_chk.get()
-        alarma = recordatorio_screen.alarma_chk.get()
-        sonido = recordatorio_screen.sonido_var.get()
-        fecha = getattr(recordatorio_screen, "fecha_seleccionada", None)
+        datos = self.vista.frames["RecordatorioScreen"]
+        titulo = datos.titulo_input.get().strip()
+        hora = datos.hora_input.get().strip()
+        repetir = datos.repetir_var.get()
+        importante = datos.importante_chk.get()
+        dias = [dia for i, dia in enumerate(["LUN","MAR","MIE","JUE","VIE","SAB","DOM"]) if datos.dias_vars[i].get()]
+        mantener = datos.mantener_chk.get()
+        alarma = datos.alarma_chk.get()
+        sonido = datos.sonido_var.get()
+        fecha = datos.fecha_seleccionada
 
-        # --- DEPURACIÓN: imprime los datos y tipos ---
-        print("DEBUG datos:", {
-            "titulo": titulo, "hora": hora, "repetir": repetir, "importante": importante,
-            "dias": dias, "mantener": mantener, "alarma": alarma, "sonido": sonido, "fecha": fecha
-        })
-        print("DEBUG tipos:", {
-            "titulo": type(titulo), "hora": type(hora), "repetir": type(repetir), "importante": type(importante),
-            "dias": type(dias), "mantener": type(mantener), "alarma": type(alarma), "sonido": type(sonido), "fecha": type(fecha)
-        })
-
-        # --- Validación robusta ---
-        if not titulo or not hora or not fecha or not isinstance(fecha, str) or len(fecha) < 8:
+        if not titulo or not hora or not fecha:
             from tkinter import messagebox
-            messagebox.showerror("Error", "Debes completar título, hora y seleccionar una fecha válida.")
+            messagebox.showerror("Error", "Debes completar título, hora y fecha.")
             return
 
-        datos = {
+        # Construye el objeto recordatorio (el modelo añadirá el id)
+        recordatorio = {
             "titulo": titulo,
             "hora": hora,
             "repetir": repetir,
@@ -157,11 +142,29 @@ class Controlador:
             "mantener": mantener,
             "alarma": alarma,
             "sonido": sonido,
-            "fecha": fecha
+            "fecha": fecha,
+            "completado": False,
+            "eliminado": False
         }
-        print("Intentando guardar recordatorio:", datos)
-        self.crear_recordatorio(datos)
-        # Vuelve a la pantalla anterior (usuario o admin)
-        self.vista.cambiar_pantalla(self.vista.pantalla_anterior or "UsuarioScreen")
+        # Guardar en el modelo y actualizar vistas internas
+        self.crear_recordatorio(recordatorio)
+
+        # Mostrar confirmación al usuario
+        from tkinter import messagebox
+        messagebox.showinfo("Guardado", f"Recordatorio '{titulo}' guardado para {fecha}.")
+
+        # Decide a qué pantalla volver según la fecha seleccionada:
+        from datetime import datetime
+        hoy_str = datetime.today().strftime('%Y-%m-%d')
+        try:
+            # Vuelve simplemente a la pantalla anterior (UsuarioScreen o PrincipalScreen)
+            pantalla_destino = self.vista.pantalla_anterior or "UsuarioScreen"
+            self.vista.cambiar_pantalla(pantalla_destino)
+        except Exception:
+            # Si hay error, vuelve a UsuarioScreen por defecto
+            self.vista.cambiar_pantalla("UsuarioScreen")
+
+    def set_rol(self, rol):
+        self.rol_actual = rol
 
 
